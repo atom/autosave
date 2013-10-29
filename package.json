@@ -1,0 +1,19 @@
+{
+  "name": "autosave",
+  "main": "./lib/autosave",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A short description of your package",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/atom/autosave.git"
+  },
+  "bugs": {
+    "url": "https://github.com/atom/autosave/issues"
+  },
+  "engines": {
+    "atom": ">27.0"
+  },
+  "dependencies": {
+  }
+}
