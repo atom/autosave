@@ -6,13 +6,14 @@ module.exports =
     @migrateOldAutosaveConfig()
 
     rootView.on 'focusout', ".editor:not(.mini)", (event) =>
-      @autosave(event.targetView()?.getModel())
+      editSession = event.targetView()?.getModel()
+      @autosave(editSession)
 
-    rootView.on 'pane:before-item-destroyed', (event, item) =>
-      @autosave(item)
+    rootView.on 'pane:before-item-destroyed', (event, paneItem) =>
+      @autosave(paneItem)
 
-  autosave: (editSession) ->
-    editSession?.save() if config.get('autosave.enabled')
+  autosave: (paneItem) ->
+    paneItem?.save?() if config.get('autosave.enabled')
 
   migrateOldAutosaveConfig: ->
     enabled = config.get('core.autosave')
