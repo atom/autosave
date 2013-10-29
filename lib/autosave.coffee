@@ -3,6 +3,8 @@ module.exports =
     enabled: false
 
   activate: (state) ->
+    @migrateOldAutosaveConfig()
+
     rootView.on 'focusout', ".editor:not(.mini)", (event) =>
       @autosave(event.targetView()?.getModel())
 
@@ -11,3 +13,10 @@ module.exports =
 
   autosave: (editSession) ->
     editSession?.save() if config.get('autosave.enabled')
+
+  migrateOldAutosaveConfig: ->
+    enabled = config.get('core.autosave')
+    return unless enabled?
+
+    config.set('autosave.enabled', enabled)
+    config.set('core.autosave', null)
