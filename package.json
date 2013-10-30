@@ -1,7 +1,7 @@
 {
   "name": "autosave",
   "main": "./lib/autosave",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "description": "A short description of your package",
   "repository": {
