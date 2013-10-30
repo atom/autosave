@@ -1,3 +1,5 @@
+{$} = require 'atom'
+
 module.exports =
   configDefaults:
     enabled: false
@@ -11,6 +13,10 @@ module.exports =
 
     rootView.on 'pane:before-item-destroyed', (event, paneItem) =>
       @autosave(paneItem)
+
+    $(window).preempt 'beforeunload', =>
+      for pane in rootView.getPanes()
+        @autosave(paneItem) for paneItem in pane.getItems()
 
   autosave: (paneItem) ->
     paneItem?.save?() if config.get('autosave.enabled')
