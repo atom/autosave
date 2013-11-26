@@ -7,15 +7,15 @@ module.exports =
   activate: (state) ->
     @migrateOldAutosaveConfig()
 
-    atom.rootView.on 'focusout', ".editor:not(.mini)", (event) =>
+    atom.workspaceView.on 'focusout', ".editor:not(.mini)", (event) =>
       editSession = event.targetView()?.getModel()
       @autosave(editSession)
 
-    atom.rootView.on 'pane:before-item-destroyed', (event, paneItem) =>
+    atom.workspaceView.on 'pane:before-item-destroyed', (event, paneItem) =>
       @autosave(paneItem)
 
     $(window).preempt 'beforeunload', =>
-      for pane in atom.rootView.getPanes()
+      for pane in atom.workspaceView.getPanes()
         @autosave(paneItem) for paneItem in pane.getItems()
 
   autosave: (paneItem) ->
