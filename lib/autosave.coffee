@@ -8,8 +8,8 @@ module.exports =
     @migrateOldAutosaveConfig()
 
     atom.workspaceView.on 'focusout', ".editor:not(.mini)", (event) =>
-      editSession = event.targetView()?.getModel()
-      @autosave(editSession)
+      editor = event.targetView()?.getModel()
+      @autosave(editor)
 
     atom.workspaceView.on 'pane:before-item-destroyed', (event, paneItem) =>
       @autosave(paneItem)
