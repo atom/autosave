@@ -68,3 +68,14 @@ describe "Autosave", ->
         expect(otherItem2).not.toBe atom.workspaceView.getActivePaneItem()
         leftPane.removeItem(otherItem2)
         expect(otherItem2.save).toHaveBeenCalled()
+
+  describe "when the item does not have a URI", ->
+    it "does not save the item", ->
+      pathLessItem = atom.workspaceView.openSync()
+      spyOn(pathLessItem, 'save').andCallThrough()
+      pathLessItem.setText('text!')
+      expect(pathLessItem.getUri()).toBeFalsy()
+
+      atom.config.set('autosave.enabled', true)
+      atom.workspaceView.getActivePane().removeItem(pathLessItem)
+      expect(pathLessItem.save).not.toHaveBeenCalled()
