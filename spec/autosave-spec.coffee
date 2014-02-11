@@ -6,16 +6,18 @@ describe "Autosave", ->
 
   beforeEach ->
     atom.workspaceView = new WorkspaceView()
-    pack = atom.packages.activatePackage("autosave", immediate: true)
+    waitsForPromise ->
+      atom.packages.activatePackage("autosave")
 
-    atom.workspaceView.attachToDom()
-    initialActiveItem = atom.workspaceView.openSync('sample.js')
-    otherItem1 = atom.project.openSync('sample.coffee')
-    otherItem2 = otherItem1.copy()
+    runs ->
+      atom.workspaceView.attachToDom()
+      initialActiveItem = atom.workspaceView.openSync('sample.js')
+      otherItem1 = atom.project.openSync('sample.coffee')
+      otherItem2 = otherItem1.copy()
 
-    spyOn(initialActiveItem, 'save').andCallThrough()
-    spyOn(otherItem1, 'save').andCallThrough()
-    spyOn(otherItem2, 'save').andCallThrough()
+      spyOn(initialActiveItem, 'save').andCallThrough()
+      spyOn(otherItem1, 'save').andCallThrough()
+      spyOn(otherItem2, 'save').andCallThrough()
 
   describe "when a pane loses focus", ->
     it "saves the item if autosave is enabled and the item has a uri", ->
