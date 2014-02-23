@@ -3,10 +3,10 @@
   "main": "./lib/autosave",
   "version": "0.11.0",
   "private": true,
-  "description": "A short description of your package",
+  "description": "Save editors when they lose focus or are closed",
   "repository": "https://github.com/atom/autosave",
   "engines": {
-    "atom": ">27.0"
+    "atom": ">0.27.0"
   },
   "dependencies": {}
 }
