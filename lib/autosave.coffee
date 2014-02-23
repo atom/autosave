@@ -4,9 +4,7 @@ module.exports =
   configDefaults:
     enabled: false
 
-  activate: (state) ->
-    @migrateOldAutosaveConfig()
-
+  activate: ->
     atom.workspaceView.on 'focusout', ".editor:not(.mini)", (event) =>
       editor = event.targetView()?.getModel()
       @autosave(editor)
@@ -21,10 +19,3 @@ module.exports =
   autosave: (paneItem) ->
     if atom.config.get('autosave.enabled') and paneItem?.getUri?()?
       paneItem?.save?()
-
-  migrateOldAutosaveConfig: ->
-    enabled = atom.config.get('core.autosave')
-    return unless enabled?
-
-    atom.config.set('autosave.enabled', enabled)
-    atom.config.set('core.autosave', null)
