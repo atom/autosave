@@ -1,5 +1,5 @@
 Autosave = require '../lib/autosave'
-{$, WorkspaceView, Editor} = require 'atom'
+{$, WorkspaceView} = require 'atom'
 
 describe "Autosave", ->
   [initialActiveItem, otherItem1, otherItem2] = []
