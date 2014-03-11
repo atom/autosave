@@ -17,5 +17,8 @@ module.exports =
         @autosave(paneItem) for paneItem in pane.getItems()
 
   autosave: (paneItem) ->
-    if atom.config.get('autosave.enabled') and paneItem?.getUri?()?
-      paneItem?.save?()
+    return unless atom.config.get('autosave.enabled')
+    return unless paneItem?.getUri?()?
+    return unless paneItem?.isModified?()
+
+    paneItem?.save?()
