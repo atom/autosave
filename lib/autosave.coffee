@@ -6,7 +6,7 @@ module.exports =
 
   activate: ->
     atom.workspaceView.on 'focusout', ".editor:not(.mini)", (event) =>
-      editor = event.targetView()?.getModel()
+      editor = $(event.target).closest('.editor').view()?.getModel()
       @autosave(editor)
 
     atom.workspaceView.on 'pane:before-item-destroyed', (event, paneItem) =>
