@@ -13,7 +13,7 @@ module.exports =
       @autosave(paneItem)
 
     $(window).preempt 'beforeunload', =>
-      for pane in atom.workspaceView.getPanes()
+      for pane in atom.workspace.getPanes()
         @autosave(paneItem) for paneItem in pane.getItems()
 
   autosave: (paneItem) ->
