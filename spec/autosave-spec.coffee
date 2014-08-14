@@ -6,15 +6,25 @@ describe "Autosave", ->
 
   beforeEach ->
     atom.workspaceView = new WorkspaceView()
+
     waitsForPromise ->
       atom.packages.activatePackage("autosave")
 
     runs ->
       atom.workspaceView.attachToDom()
-      initialActiveItem = atom.workspaceView.openSync('sample.js')
-      otherItem1 = atom.project.openSync('sample.coffee')
-      otherItem2 = otherItem1.copy()
 
+    waitsForPromise ->
+      atom.workspace.open('sample.js')
+
+    runs ->
+      initialActiveItem = atom.workspace.getActiveEditor()
+
+    waitsForPromise ->
+      atom.project.open('sample.coffee').then (o) ->
+        otherItem1 = o
+        otherItem2 = otherItem1.copy()
+
+    runs ->
       spyOn(initialActiveItem, 'save')
       spyOn(otherItem1, 'save')
       spyOn(otherItem2, 'save')
@@ -22,7 +32,7 @@ describe "Autosave", ->
   describe "when the item is not modified", ->
     it "does not autosave the item", ->
       atom.config.set('autosave.enabled', true)
-      leftPane = atom.workspaceView.getActivePane()
+      leftPane = atom.workspaceView.getActivePaneView()
       rightPane = leftPane.splitRight(otherItem1)
       expect(initialActiveItem.save).not.toHaveBeenCalled()
 
@@ -42,7 +52,7 @@ describe "Autosave", ->
 
     describe "when a new pane is created", ->
       it "saves the item if autosave is enabled and the item has a uri", ->
-        leftPane = atom.workspaceView.getActivePane()
+        leftPane = atom.workspaceView.getActivePaneView()
         rightPane = leftPane.splitRight(otherItem1)
         expect(initialActiveItem.save).not.toHaveBeenCalled()
 
@@ -54,43 +64,47 @@ describe "Autosave", ->
     describe "when an item is destroyed", ->
       describe "when the item is the active item", ->
         it "does not save the item if autosave is enabled and the item has a uri", ->
-          leftPane = atom.workspaceView.getActivePane()
+          leftPane = atom.workspaceView.getActivePaneView()
           rightPane = leftPane.splitRight(otherItem1)
           leftPane.focus()
-          expect(initialActiveItem).toBe atom.workspaceView.getActivePaneItem()
-          leftPane.removeItem(initialActiveItem)
+          expect(initialActiveItem).toBe atom.workspace.getActivePaneItem()
+          leftPane.destroyItem(initialActiveItem)
           expect(initialActiveItem.save).not.toHaveBeenCalled()
 
           otherItem2.setText("I am also modified")
           atom.config.set("autosave.enabled", true)
           leftPane = rightPane.splitLeft(otherItem2)
-          expect(otherItem2).toBe atom.workspaceView.getActivePaneItem()
-          leftPane.removeItem(otherItem2)
+          expect(otherItem2).toBe atom.workspace.getActivePaneItem()
+          leftPane.destroyItem(otherItem2)
           expect(otherItem2.save).toHaveBeenCalled()
 
       describe "when the item is NOT the active item", ->
         it "does not save the item if autosave is enabled and the item has a uri", ->
-          leftPane = atom.workspaceView.getActivePane()
+          leftPane = atom.workspaceView.getActivePaneView()
           rightPane = leftPane.splitRight(otherItem1)
-          expect(initialActiveItem).not.toBe atom.workspaceView.getActivePaneItem()
-          leftPane.removeItem(initialActiveItem)
+          expect(initialActiveItem).not.toBe atom.workspace.getActivePaneItem()
+          leftPane.destroyItem(initialActiveItem)
           expect(initialActiveItem.save).not.toHaveBeenCalled()
 
           otherItem2.setText("I am also modified")
           atom.config.set("autosave.enabled", true)
           leftPane = rightPane.splitLeft(otherItem2)
           rightPane.focus()
-          expect(otherItem2).not.toBe atom.workspaceView.getActivePaneItem()
-          leftPane.removeItem(otherItem2)
+          expect(otherItem2).not.toBe atom.workspace.getActivePaneItem()
+          leftPane.destroyItem(otherItem2)
           expect(otherItem2.save).toHaveBeenCalled()
 
     describe "when the item does not have a URI", ->
       it "does not save the item", ->
-        pathLessItem = atom.workspaceView.openSync()
-        spyOn(pathLessItem, 'save').andCallThrough()
-        pathLessItem.setText('text!')
-        expect(pathLessItem.getUri()).toBeFalsy()
+        waitsForPromise ->
+          atom.workspace.open()
 
-        atom.config.set('autosave.enabled', true)
-        atom.workspaceView.getActivePane().removeItem(pathLessItem)
-        expect(pathLessItem.save).not.toHaveBeenCalled()
+        runs ->
+          pathLessItem = atom.workspace.getActiveEditor()
+          spyOn(pathLessItem, 'save').andCallThrough()
+          pathLessItem.setText('text!')
+          expect(pathLessItem.getUri()).toBeFalsy()
+
+          atom.config.set('autosave.enabled', true)
+          atom.workspaceView.getActivePaneView().destroyItem(pathLessItem)
+          expect(pathLessItem.save).not.toHaveBeenCalled()
