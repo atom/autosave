@@ -2,7 +2,7 @@
 
 module.exports =
   configDefaults:
-    enabled: false
+    enabled: true
 
   activate: ->
     atom.workspaceView.on 'focusout', ".editor:not(.mini)", (event) =>
