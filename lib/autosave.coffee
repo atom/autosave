@@ -9,8 +9,11 @@ module.exports =
     $(window).preempt 'beforeunload', => @autosaveAll()
 
     atom.workspaceView.on 'focusout', ".editor:not(.mini)", (event) =>
-      editor = $(event.target).closest('.editor').view()?.getModel()
-      @autosave(editor)
+      if editorView = $(event.target).closest('.editor').view()
+        # If focusing an element *contained* by the editor, don't autosave
+        return if editorView.element.contains(event.relatedTarget)
+        editor = editorView.getModel()
+        @autosave(editor)
 
     atom.workspaceView.on 'pane:before-item-destroyed', (event, paneItem) =>
       @autosave(paneItem)

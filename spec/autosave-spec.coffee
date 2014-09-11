@@ -50,6 +50,13 @@ describe "Autosave", ->
         $('body').focus()
         expect(initialActiveItem.save).toHaveBeenCalled()
 
+      it "suppresses autosave if the focused element is contained by the editor, such as occurs when opening the autocomplete menu", ->
+        atom.config.set('autosave.enabled', true)
+        focusStealer = $('<div tabindex=-1></div>')
+        atom.workspaceView.getActiveView().append(focusStealer)
+        focusStealer.focus()
+        expect(initialActiveItem.save).not.toHaveBeenCalled()
+
     describe "when a new pane is created", ->
       it "saves the item if autosave is enabled and the item has a uri", ->
         leftPane = atom.workspaceView.getActivePaneView()
