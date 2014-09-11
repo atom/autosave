@@ -9,6 +9,10 @@ module.exports =
     $(window).preempt 'beforeunload', => @autosaveAll()
 
     atom.workspaceView.on 'focusout', ".editor:not(.mini)", (event) =>
+      # Don't autosave if the focus change was towards a select list.
+      # Select lists will be opened by packages like autosuggest.
+      if $(event.relatedTarget).closest(".select-list").length
+        return
       editor = $(event.target).closest('.editor').view()?.getModel()
       @autosave(editor)
 
