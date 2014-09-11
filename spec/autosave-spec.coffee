@@ -108,3 +108,18 @@ describe "Autosave", ->
           atom.config.set('autosave.enabled', true)
           atom.workspaceView.getActivePaneView().destroyItem(pathLessItem)
           expect(pathLessItem.save).not.toHaveBeenCalled()
+
+  describe "when the window is blurred", ->
+    it "saves all items", ->
+      atom.config.set('autosave.enabled', true)
+
+      leftPane = atom.workspaceView.getActivePaneView()
+      rightPane = leftPane.splitRight(otherItem1)
+
+      initialActiveItem.insertText('a')
+      otherItem1.insertText('b')
+
+      $(window).trigger('blur')
+
+      expect(initialActiveItem.save).toHaveBeenCalled()
+      expect(otherItem1.save).toHaveBeenCalled()
