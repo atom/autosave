@@ -64,6 +64,7 @@ describe "Autosave", ->
         expect(initialActiveItem.save).not.toHaveBeenCalled()
 
         rightPane.remove()
+        leftPane.focus()
         atom.config.set('autosave.enabled', true)
         leftPane.splitRight(otherItem2)
         expect(initialActiveItem.save).toHaveBeenCalled()
