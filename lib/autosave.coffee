@@ -2,7 +2,7 @@
 
 module.exports =
   configDefaults:
-    enabled: false
+    enabled: true
 
   activate: ->
     $(window).on 'blur', => @autosaveAll()
