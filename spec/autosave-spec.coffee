@@ -1,17 +1,14 @@
 Autosave = require '../lib/autosave'
-{$, WorkspaceView} = require 'atom'
 
 describe "Autosave", ->
-  [initialActiveItem, otherItem1, otherItem2] = []
+  [workspaceElement, initialActiveItem, otherItem1, otherItem2] = []
 
   beforeEach ->
-    atom.workspaceView = new WorkspaceView()
+    workspaceElement = atom.views.getView(atom.workspace)
+    jasmine.attachToDOM(workspaceElement)
 
     waitsForPromise ->
       atom.packages.activatePackage("autosave")
-
-    runs ->
-      atom.workspaceView.attachToDom()
 
     waitsForPromise ->
       atom.workspace.open('sample.js')
@@ -32,8 +29,7 @@ describe "Autosave", ->
   describe "when the item is not modified", ->
     it "does not autosave the item", ->
       atom.config.set('autosave.enabled', true)
-      leftPane = atom.workspaceView.getActivePaneView()
-      rightPane = leftPane.splitRight(otherItem1)
+      atom.workspace.getActivePane().splitRight(items: [otherItem1])
       expect(initialActiveItem.save).not.toHaveBeenCalled()
 
   describe "when the buffer is modified", ->
@@ -42,61 +38,65 @@ describe "Autosave", ->
 
     describe "when a pane loses focus", ->
       it "saves the item if autosave is enabled and the item has a uri", ->
-        $('body').focus()
+        document.body.focus()
         expect(initialActiveItem.save).not.toHaveBeenCalled()
 
-        atom.workspaceView.focus()
+        workspaceElement.focus()
         atom.config.set('autosave.enabled', true)
-        $('body').focus()
+        document.body.focus()
         expect(initialActiveItem.save).toHaveBeenCalled()
 
       it "suppresses autosave if the focused element is contained by the editor, such as occurs when opening the autocomplete menu", ->
         atom.config.set('autosave.enabled', true)
-        focusStealer = $('<div tabindex=-1></div>')
-        atom.workspaceView.getActiveView().append(focusStealer)
+        focusStealer = document.createElement('div')
+        focusStealer.setAttribute('tabindex', -1)
+
+        textEditorElement = atom.views.getView(atom.workspace.getActiveTextEditor())
+        textEditorElement.appendChild(focusStealer)
         focusStealer.focus()
         expect(initialActiveItem.save).not.toHaveBeenCalled()
 
     describe "when a new pane is created", ->
       it "saves the item if autosave is enabled and the item has a uri", ->
-        leftPane = atom.workspaceView.getActivePaneView()
-        rightPane = leftPane.splitRight(otherItem1)
+        leftPane = atom.workspace.getActivePane()
+        rightPane = leftPane.splitRight()
         expect(initialActiveItem.save).not.toHaveBeenCalled()
 
-        rightPane.remove()
-        leftPane.focus()
+        rightPane.destroy()
+        leftPane.activate()
+
         atom.config.set('autosave.enabled', true)
-        leftPane.splitRight(otherItem2)
+        leftPane.splitRight()
         expect(initialActiveItem.save).toHaveBeenCalled()
 
     describe "when an item is destroyed", ->
       describe "when the item is the active item", ->
         it "does not save the item if autosave is enabled and the item has a uri", ->
-          leftPane = atom.workspaceView.getActivePaneView()
-          rightPane = leftPane.splitRight(otherItem1)
-          leftPane.focus()
+          leftPane = atom.workspace.getActivePane()
+          rightPane = leftPane.splitRight(items: [otherItem1])
+          leftPane.activate()
           expect(initialActiveItem).toBe atom.workspace.getActivePaneItem()
           leftPane.destroyItem(initialActiveItem)
           expect(initialActiveItem.save).not.toHaveBeenCalled()
 
           otherItem2.setText("I am also modified")
           atom.config.set("autosave.enabled", true)
-          leftPane = rightPane.splitLeft(otherItem2)
+          leftPane = rightPane.splitLeft(items: [otherItem2])
           expect(otherItem2).toBe atom.workspace.getActivePaneItem()
           leftPane.destroyItem(otherItem2)
           expect(otherItem2.save).toHaveBeenCalled()
 
       describe "when the item is NOT the active item", ->
         it "does not save the item if autosave is enabled and the item has a uri", ->
-          leftPane = atom.workspaceView.getActivePaneView()
-          rightPane = leftPane.splitRight(otherItem1)
+          leftPane = atom.workspace.getActivePane()
+          rightPane = leftPane.splitRight(items: [otherItem1])
           expect(initialActiveItem).not.toBe atom.workspace.getActivePaneItem()
           leftPane.destroyItem(initialActiveItem)
           expect(initialActiveItem.save).not.toHaveBeenCalled()
 
           otherItem2.setText("I am also modified")
           atom.config.set("autosave.enabled", true)
-          leftPane = rightPane.splitLeft(otherItem2)
+          leftPane = rightPane.splitLeft(items: [otherItem2])
           rightPane.focus()
           expect(otherItem2).not.toBe atom.workspace.getActivePaneItem()
           leftPane.destroyItem(otherItem2)
@@ -114,20 +114,20 @@ describe "Autosave", ->
           expect(pathLessItem.getUri()).toBeFalsy()
 
           atom.config.set('autosave.enabled', true)
-          atom.workspaceView.getActivePaneView().destroyItem(pathLessItem)
+          atom.workspace.getActivePane().destroyItem(pathLessItem)
           expect(pathLessItem.save).not.toHaveBeenCalled()
 
   describe "when the window is blurred", ->
     it "saves all items", ->
       atom.config.set('autosave.enabled', true)
 
-      leftPane = atom.workspaceView.getActivePaneView()
-      rightPane = leftPane.splitRight(otherItem1)
+      leftPane = atom.workspace.getActivePane()
+      rightPane = leftPane.splitRight(items: [otherItem1])
 
       initialActiveItem.insertText('a')
       otherItem1.insertText('b')
 
-      $(window).trigger('blur')
+      window.dispatchEvent(new FocusEvent('blur'))
 
       expect(initialActiveItem.save).toHaveBeenCalled()
       expect(otherItem1.save).toHaveBeenCalled()
