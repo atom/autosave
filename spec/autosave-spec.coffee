@@ -14,7 +14,7 @@ describe "Autosave", ->
       atom.workspace.open('sample.js')
 
     runs ->
-      initialActiveItem = atom.workspace.getActiveEditor()
+      initialActiveItem = atom.workspace.getActiveTextEditor()
 
     waitsForPromise ->
       atom.project.open('sample.coffee').then (o) ->
@@ -108,7 +108,7 @@ describe "Autosave", ->
           atom.workspace.open()
 
         runs ->
-          pathLessItem = atom.workspace.getActiveEditor()
+          pathLessItem = atom.workspace.getActiveTextEditor()
           spyOn(pathLessItem, 'save').andCallThrough()
           pathLessItem.setText('text!')
           expect(pathLessItem.getUri()).toBeFalsy()
