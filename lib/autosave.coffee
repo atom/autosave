@@ -1,30 +1,41 @@
-{$} = require 'atom'
+{CompositeDisposable, Disposable} = require 'atom'
 
 module.exports =
-  configDefaults:
-    enabled: false
+  config:
+    enabled:
+      type: 'boolean'
+      default: false
+
+  subscriptions: null
 
   activate: ->
-    $(window).on 'blur', => @autosaveAll()
-    $(window).preempt 'beforeunload', => @autosaveAll()
+    @subscriptions = new CompositeDisposable
 
-    atom.workspaceView.on 'focusout', ".editor:not(.mini)", (event) =>
-      if editorView = $(event.target).closest('.editor').view()
-        # If focusing an element *contained* by the editor, don't autosave
-        return if editorView.element.contains(event.relatedTarget)
-        editor = editorView.getModel()
-        @autosave(editor)
+    handleBeforeUnload = @autosaveAllPaneItems.bind(this)
 
-    atom.workspaceView.on 'pane:before-item-destroyed', (event, paneItem) =>
-      @autosave(paneItem)
+    window.addEventListener('beforeunload', handleBeforeUnload, true)
+    @subscriptions.add new Disposable -> window.removeEventListener('beforeunload', handleBeforeUnload, true)
 
-  autosave: (paneItem) ->
+    handleBlur = (event) =>
+      if event.target is window
+        @autosaveAllPaneItems()
+      else if event.target.matches('atom-text-editor:not([mini])') and not event.target.contains(event.relatedTarget)
+        @autosavePaneItem(event.target.getModel())
+
+    window.addEventListener('blur', handleBlur, true)
+    @subscriptions.add new Disposable -> window.removeEventListener('blur', handleBlur, true)
+
+    @subscriptions.add atom.workspace.onWillDestroyPaneItem ({item}) => @autosavePaneItem(item)
+
+  deactivate: ->
+    @subscriptions.dispose()
+
+  autosavePaneItem: (paneItem) ->
     return unless atom.config.get('autosave.enabled')
     return unless paneItem?.getUri?()?
     return unless paneItem?.isModified?()
 
     paneItem?.save?()
 
-  autosaveAll: ->
-    for pane in atom.workspace.getPanes()
-      @autosave(paneItem) for paneItem in pane.getItems()
+  autosaveAllPaneItems: ->
+    @autosavePaneItem(paneItem) for paneItem in atom.workspace.getPaneItems()
