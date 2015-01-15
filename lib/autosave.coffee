@@ -32,7 +32,7 @@ module.exports =
 
   autosavePaneItem: (paneItem) ->
     return unless atom.config.get('autosave.enabled')
-    return unless paneItem?.getUri?()?
+    return unless paneItem?.getURI?()?
     return unless paneItem?.isModified?()
 
     paneItem?.save?()

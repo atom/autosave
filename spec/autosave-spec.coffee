@@ -111,7 +111,7 @@ describe "Autosave", ->
           pathLessItem = atom.workspace.getActiveTextEditor()
           spyOn(pathLessItem, 'save').andCallThrough()
           pathLessItem.setText('text!')
-          expect(pathLessItem.getUri()).toBeFalsy()
+          expect(pathLessItem.getURI()).toBeFalsy()
 
           atom.config.set('autosave.enabled', true)
           atom.workspace.getActivePane().destroyItem(pathLessItem)
