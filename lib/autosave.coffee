@@ -5,6 +5,9 @@ module.exports =
     enabled:
       type: 'boolean'
       default: false
+    saveOnFocus:
+      type: 'boolean'
+      default: false
 
   subscriptions: null
 
@@ -17,6 +20,8 @@ module.exports =
     @subscriptions.add new Disposable -> window.removeEventListener('beforeunload', handleBeforeUnload, true)
 
     handleBlur = (event) =>
+      return unless atom.config.get('autosave.saveOnFocus')
+
       if event.target is window
         @autosaveAllPaneItems()
       else if event.target.matches('atom-text-editor:not([mini])') and not event.target.contains(event.relatedTarget)
