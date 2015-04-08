@@ -5,7 +5,7 @@ module.exports =
     enabled:
       type: 'boolean'
       default: false
-    saveOnFocus:
+    enableSaveOnFocusChange:
       type: 'boolean'
       default: false
 
@@ -20,7 +20,7 @@ module.exports =
     @subscriptions.add new Disposable -> window.removeEventListener('beforeunload', handleBeforeUnload, true)
 
     handleBlur = (event) =>
-      return unless atom.config.get('autosave.saveOnFocus')
+      return unless atom.config.get('autosave.enableSaveOnFocusChange')
 
       if event.target is window
         @autosaveAllPaneItems()
