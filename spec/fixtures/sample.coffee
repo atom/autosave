@@ -1,4 +1,4 @@
-class quicksort
+class Quicksort
   sort: (items) ->
     return items if items.length <= 1
 
@@ -13,7 +13,7 @@ class quicksort
       if current < pivot
         left.push(current)
       else
-        right.push(current);
+        right.push(current)
 
     sort(left).concat(pivot).concat(sort(right))
 
