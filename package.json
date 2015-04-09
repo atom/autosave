@@ -8,5 +8,8 @@
   "engines": {
     "atom": ">0.27.0"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "coffeelint": "^1.9.3"
+  }
 }
