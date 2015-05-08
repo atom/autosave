@@ -1,4 +1,5 @@
 {CompositeDisposable, Disposable} = require 'atom'
+fs = require 'fs-plus'
 
 module.exports =
   config:
@@ -34,6 +35,7 @@ module.exports =
     return unless atom.config.get('autosave.enabled')
     return unless paneItem?.getURI?()?
     return unless paneItem?.isModified?()
+    return unless paneItem?.getPath()? and fs.isFileSync(paneItem.getPath())
 
     paneItem?.save?()
 

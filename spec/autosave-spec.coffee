@@ -1,4 +1,5 @@
 Autosave = require '../lib/autosave'
+fs = require 'fs-plus'
 
 describe "Autosave", ->
   [workspaceElement, initialActiveItem, otherItem1, otherItem2] = []
@@ -45,6 +46,22 @@ describe "Autosave", ->
         atom.config.set('autosave.enabled', true)
         document.body.focus()
         expect(initialActiveItem.save).toHaveBeenCalled()
+
+      it "suppresses autosave if the files doesn't exist", ->
+        document.body.focus()
+        expect(initialActiveItem.save).not.toHaveBeenCalled()
+
+        workspaceElement.focus()
+        atom.config.set('autosave.enabled', true)
+
+        originalPath = atom.workspace.getActiveTextEditor().getPath()
+        tmpPath = "#{originalPath}~"
+        fs.renameSync(originalPath, tmpPath)
+
+        document.body.focus()
+        expect(initialActiveItem.save).not.toHaveBeenCalled()
+
+        fs.renameSync(tmpPath, originalPath)
 
       it "suppresses autosave if the focused element is contained by the editor, such as occurs when opening the autocomplete menu", ->
         atom.config.set('autosave.enabled', true)
