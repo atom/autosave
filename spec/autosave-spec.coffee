@@ -29,6 +29,7 @@ describe "Autosave", ->
   describe "when the item is not modified", ->
     it "does not autosave the item", ->
       atom.config.set('autosave.enabled', true)
+      atom.config.set('autosave.enableSaveOnFocusChange', true)
       atom.workspace.getActivePane().splitRight(items: [otherItem1])
       expect(initialActiveItem.save).not.toHaveBeenCalled()
 
@@ -43,11 +44,22 @@ describe "Autosave", ->
 
         workspaceElement.focus()
         atom.config.set('autosave.enabled', true)
+        atom.config.set('autosave.enableSaveOnFocusChange', true)
         document.body.focus()
         expect(initialActiveItem.save).toHaveBeenCalled()
 
+      it "suppresses autosave if enableSaveOnFocusChange is not enabled", ->
+        document.body.focus()
+        expect(initialActiveItem.save).not.toHaveBeenCalled()
+
+        workspaceElement.focus()
+        atom.config.set('autosave.enabled', true)
+        document.body.focus()
+        expect(initialActiveItem.save).not.toHaveBeenCalled()
+
       it "suppresses autosave if the focused element is contained by the editor, such as occurs when opening the autocomplete menu", ->
         atom.config.set('autosave.enabled', true)
+        atom.config.set('autosave.enableSaveOnFocusChange', true)
         focusStealer = document.createElement('div')
         focusStealer.setAttribute('tabindex', -1)
 
@@ -66,6 +78,7 @@ describe "Autosave", ->
         leftPane.activate()
 
         atom.config.set('autosave.enabled', true)
+        atom.config.set('autosave.enableSaveOnFocusChange', true)
         leftPane.splitRight()
         expect(initialActiveItem.save).toHaveBeenCalled()
 
@@ -81,6 +94,7 @@ describe "Autosave", ->
 
           otherItem2.setText("I am also modified")
           atom.config.set("autosave.enabled", true)
+          atom.config.set('autosave.enableSaveOnFocusChange', true)
           leftPane = rightPane.splitLeft(items: [otherItem2])
           expect(otherItem2).toBe atom.workspace.getActivePaneItem()
           leftPane.destroyItem(otherItem2)
@@ -96,6 +110,7 @@ describe "Autosave", ->
 
           otherItem2.setText("I am also modified")
           atom.config.set("autosave.enabled", true)
+          atom.config.set('autosave.enableSaveOnFocusChange', true)
           leftPane = rightPane.splitLeft(items: [otherItem2])
           rightPane.focus()
           expect(otherItem2).not.toBe atom.workspace.getActivePaneItem()
@@ -114,12 +129,14 @@ describe "Autosave", ->
           expect(pathLessItem.getURI()).toBeFalsy()
 
           atom.config.set('autosave.enabled', true)
+          atom.config.set('autosave.enableSaveOnFocusChange', true)
           atom.workspace.getActivePane().destroyItem(pathLessItem)
           expect(pathLessItem.save).not.toHaveBeenCalled()
 
   describe "when the window is blurred", ->
     it "saves all items", ->
       atom.config.set('autosave.enabled', true)
+      atom.config.set('autosave.enableSaveOnFocusChange', true)
 
       leftPane = atom.workspace.getActivePane()
       rightPane = leftPane.splitRight(items: [otherItem1])
