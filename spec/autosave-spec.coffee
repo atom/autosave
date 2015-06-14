@@ -47,7 +47,7 @@ describe "Autosave", ->
         document.body.focus()
         expect(initialActiveItem.save).toHaveBeenCalled()
 
-      it "suppresses autosave if the files doesn't exist", ->
+      it "suppresses autosave if the file does not exist", ->
         document.body.focus()
         expect(initialActiveItem.save).not.toHaveBeenCalled()
 
