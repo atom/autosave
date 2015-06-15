@@ -8,7 +8,9 @@
   "engines": {
     "atom": ">0.27.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "fs-plus": "^2.0.0"
+  },
   "devDependencies": {
     "coffeelint": "^1.9.7"
   }
