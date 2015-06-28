@@ -37,7 +37,10 @@ module.exports =
     return unless paneItem?.isModified?()
     return unless paneItem?.getPath?()? and fs.isFileSync(paneItem.getPath())
 
-    paneItem?.save?()
+    try
+      paneItem?.save?()
+    catch error
+      throw error unless error.code is 'EACCES' or error.code is 'EPERM'
 
   autosaveAllPaneItems: ->
     @autosavePaneItem(paneItem) for paneItem in atom.workspace.getPaneItems()
