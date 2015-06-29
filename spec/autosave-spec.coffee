@@ -148,3 +148,33 @@ describe "Autosave", ->
 
       expect(initialActiveItem.save).toHaveBeenCalled()
       expect(otherItem1.save).toHaveBeenCalled()
+
+  describe "when saving failed", ->
+    beforeEach ->
+      atom.config.set('autosave.enabled', true)
+      initialActiveItem.setText("i am modified")
+
+    afterEach ->
+      initialActiveItem.save.reset()
+
+    it "ignores EACCES error", ->
+      error = new Error()
+      error.code = 'EACCES'
+
+      initialActiveItem.save.andThrow error
+      Autosave.autosavePaneItem initialActiveItem
+
+      expect(initialActiveItem.save).toHaveBeenCalled()
+
+    it "ignores EPERM error", ->
+      error = new Error()
+      error.code = 'EPERM'
+
+      initialActiveItem.save.andThrow error
+      Autosave.autosavePaneItem initialActiveItem
+
+      expect(initialActiveItem.save).toHaveBeenCalled()
+
+    it "doesn't handle other errors", ->
+      initialActiveItem.save.andThrow new Error('unknown error')
+      expect(-> Autosave.autosavePaneItem initialActiveItem).toThrow()
