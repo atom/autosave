@@ -41,7 +41,7 @@ module.exports =
     if pane?
       pane.saveItem(paneItem)
     else
-      paneItem?.save?()
+      paneItem.save?()
 
   autosaveAllPaneItems: ->
     @autosavePaneItem(paneItem) for paneItem in atom.workspace.getPaneItems()
