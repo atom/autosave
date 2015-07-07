@@ -157,6 +157,6 @@ describe "Autosave", ->
     initialActiveItem.insertText('a')
 
     atom.config.set('autosave.enabled', true)
-    atom.workspace.destroyActivePaneItem()
+    expect(-> atom.workspace.destroyActivePaneItem()).not.toThrow()
 
     expect(initialActiveItem.save).toHaveBeenCalled()

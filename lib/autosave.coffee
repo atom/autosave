@@ -37,7 +37,11 @@ module.exports =
     return unless paneItem?.isModified?()
     return unless paneItem?.getPath?()? and fs.isFileSync(paneItem.getPath())
 
-    paneItem?.save?()
+    pane = atom.workspace.paneForItem(paneItem)
+    if pane?
+      pane.saveItem(paneItem)
+    else
+      paneItem?.save?()
 
   autosaveAllPaneItems: ->
     @autosavePaneItem(paneItem) for paneItem in atom.workspace.getPaneItems()
