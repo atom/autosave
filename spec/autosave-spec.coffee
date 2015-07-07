@@ -148,3 +148,15 @@ describe "Autosave", ->
 
       expect(initialActiveItem.save).toHaveBeenCalled()
       expect(otherItem1.save).toHaveBeenCalled()
+
+  it "saves via the item's Pane so that write errors are handled via notifications", ->
+    saveError = new Error('Save failed')
+    saveError.code = 'EACCES'
+    saveError.path = initialActiveItem.getPath()
+    initialActiveItem.save.andThrow(saveError)
+    initialActiveItem.insertText('a')
+
+    atom.config.set('autosave.enabled', true)
+    atom.workspace.destroyActivePaneItem()
+
+    expect(initialActiveItem.save).toHaveBeenCalled()
