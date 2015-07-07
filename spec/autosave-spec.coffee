@@ -154,9 +154,13 @@ describe "Autosave", ->
     saveError.code = 'EACCES'
     saveError.path = initialActiveItem.getPath()
     initialActiveItem.save.andThrow(saveError)
+
+    errorCallback = jasmine.createSpy('errorCallback').andCallFake ({preventDefault}) -> preventDefault()
+    atom.onWillThrowError(errorCallback)
+
     initialActiveItem.insertText('a')
-
     atom.config.set('autosave.enabled', true)
-    expect(-> atom.workspace.destroyActivePaneItem()).not.toThrow()
 
+    expect(-> atom.workspace.destroyActivePaneItem()).not.toThrow()
     expect(initialActiveItem.save).toHaveBeenCalled()
+    expect(errorCallback.callCount).toBe 1
