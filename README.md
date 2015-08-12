@@ -6,3 +6,22 @@ closed.
 This package is disabled by default and can be enabled via the
 `autosave.enabled` config setting or from the Autosave section of the Settings
 view (`cmd-,`).
+
+## Service API
+
+### package.json
+``` json
+"consumedServices": {
+  "autosave": {
+    "versions": {
+      "0.22.0": "consumeAutosave"
+    }
+  }
+}
+```
+
+### package initialize
+``` coffeescript
+consumeAutosave: (dontSaveIf) ->
+  dontSaveIf (paneItem) -> paneItem.getPath() is '/dont/autosave/me.coffee'
+```

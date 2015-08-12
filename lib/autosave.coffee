@@ -1,5 +1,6 @@
 {CompositeDisposable, Disposable} = require 'atom'
 fs = require 'fs-plus'
+{dontSaveIf, shouldSave} = require './controls'
 
 module.exports =
   config:
@@ -8,6 +9,8 @@ module.exports =
       default: false
 
   subscriptions: null
+
+  provideControls: -> dontSaveIf
 
   activate: ->
     @subscriptions = new CompositeDisposable
@@ -33,6 +36,7 @@ module.exports =
 
   autosavePaneItem: (paneItem) ->
     return unless atom.config.get('autosave.enabled')
+    return unless shouldSave(paneItem)
     return unless paneItem?.getURI?()?
     return unless paneItem?.isModified?()
     return unless paneItem?.getPath?()? and fs.isFileSync(paneItem.getPath())
