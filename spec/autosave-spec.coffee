@@ -18,7 +18,13 @@ describe "Autosave", ->
       initialActiveItem = atom.workspace.getActiveTextEditor()
 
     waitsForPromise ->
-      atom.project.open('sample.coffee').then (o) ->
+      opener =
+        if atom.workspace.buildTextEditor?
+          atom.workspace.open('sample.coffee', activateItem: false)
+        else
+          atom.project.open('sample.coffee')
+
+      opener.then (o) ->
         otherItem1 = o
         otherItem2 = otherItem1.copy()
 
