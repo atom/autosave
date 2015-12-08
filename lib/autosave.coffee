@@ -3,11 +3,6 @@ fs = require 'fs-plus'
 {dontSaveIf, shouldSave} = require './controls'
 
 module.exports =
-  config:
-    enabled:
-      type: 'boolean'
-      default: false
-
   subscriptions: null
 
   provideControls: -> dontSaveIf
