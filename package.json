@@ -13,5 +13,11 @@
   },
   "devDependencies": {
     "coffeelint": "^1.9.7"
+  },
+  "configSchema": {
+    "enabled": {
+      "type": "boolean",
+      "default": false
+    }
   }
 }
