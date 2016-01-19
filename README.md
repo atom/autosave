@@ -5,7 +5,7 @@ closed.
 
 This package is disabled by default and can be enabled via the
 `autosave.enabled` config setting or from the Autosave section of the Settings
-view (`cmd-,`).
+view (OS X: <kbd>cmd-,</kbd>, Windows & Linux: <kbd>Ctrl-,</kbd>).
 
 ## Service API
 
