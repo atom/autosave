@@ -2,11 +2,6 @@
 fs = require 'fs-plus'
 
 module.exports =
-  config:
-    enabled:
-      type: 'boolean'
-      default: false
-
   subscriptions: null
 
   activate: ->
