@@ -15,8 +15,9 @@ module.exports =
     handleBlur = (event) =>
       if event.target is window
         @autosaveAllPaneItems()
-      else if event.target.matches('atom-text-editor:not([mini])') and not event.target.contains(event.relatedTarget)
-        @autosavePaneItem(event.target.getModel())
+      else if editorElement = event.target.closest('atom-text-editor:not(mini)')
+        unless event.target.matches('atom-text-editor:not(mini)') or editorElement.contains(event.relatedTarget)
+          @autosavePaneItem(editorElement.getModel())
 
     window.addEventListener('blur', handleBlur, true)
     @subscriptions.add new Disposable -> window.removeEventListener('blur', handleBlur, true)
