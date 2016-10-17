@@ -19,7 +19,7 @@ module.exports =
       if event.target is window
         @autosaveAllPaneItems()
       else if editorElement = event.target.closest('atom-text-editor:not(mini)')
-        unless event.target.matches('atom-text-editor:not(mini)') or editorElement.contains(event.relatedTarget)
+        unless editorElement.contains(event.relatedTarget) or (editorElement.lightDOM and editorElement is event.target)
           @autosavePaneItem(editorElement.getModel())
 
     window.addEventListener('blur', handleBlur, true)
