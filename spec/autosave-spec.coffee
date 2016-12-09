@@ -140,6 +140,20 @@ describe "Autosave", ->
           atom.workspace.getActivePane().destroyItem(pathLessItem)
           expect(pathLessItem.save).not.toHaveBeenCalled()
 
+    describe "when the item is ignored in the settings", ->
+      it "does not save the item", ->
+        waitsForPromise ->
+          atom.workspace.open('sample.js')
+
+        runs ->
+          atom.config.set('autosave.enabled', true)
+          atom.config.set('autosave.ignoreFiles', 'sample.js')
+          file = atom.workspace.getActiveTextEditor()
+          file.insertText('text!')
+
+          window.dispatchEvent(new FocusEvent('blur'))
+          expect(file.save).not.toHaveBeenCalled()
+
   describe "when the window is blurred", ->
     it "saves all items", ->
       atom.config.set('autosave.enabled', true)

@@ -18,6 +18,12 @@
     "enabled": {
       "type": "boolean",
       "default": false
+    },
+    "ignoreFiles": {
+      "title": "Files to ignore",
+      "type": "string",
+      "description": "Files which should not be autosaved",
+      "default": null
     }
   }
 }

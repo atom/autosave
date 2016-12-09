@@ -28,10 +28,13 @@ module.exports =
     @subscriptions.dispose()
 
   autosavePaneItem: (paneItem) ->
+    ignorable = (file) -> new RegExp(file).test(paneItem.getPath())
+    filesToIgnore = atom.config.get('autosave.ignoreFiles')?.split(',') || []
     return unless atom.config.get('autosave.enabled')
     return unless paneItem?.getURI?()?
     return unless paneItem?.isModified?()
     return unless paneItem?.getPath?()? and fs.isFileSync(paneItem.getPath())
+    return if filesToIgnore.some(ignorable)
 
     pane = atom.workspace.paneForItem(paneItem)
     if pane?
