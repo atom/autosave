@@ -5,7 +5,7 @@ fs = require 'fs-plus'
 module.exports =
   subscriptions: null
 
-  provideControls: -> {dontSaveIf}
+  provideService: -> {dontSaveIf}
 
   activate: ->
     @subscriptions = new CompositeDisposable

@@ -12,7 +12,7 @@
     "autosave": {
       "description": "A configuration object to control what is autosaved",
       "versions": {
-        "0.22.0": "provideControls"
+        "1.0.0": "provideService"
       }
     }
   },
