@@ -172,9 +172,12 @@ describe "Autosave", ->
     expect(initialActiveItem.save).toHaveBeenCalled()
     expect(errorCallback.callCount).toBe 1
 
-  describe "Exposed controls", ->
-    it "doesn't save a paneItem that matches a provided predicate", ->
+  describe "dontSaveIf service", ->
+    it "doesn't save a paneItem if a predicate function registered via the dontSaveIf service returns true", ->
       atom.config.set('autosave.enabled', true)
+      service = atom.packages.getActivePackage('autosave').mainModule.provideService()
+      service.dontSaveIf (paneItem) -> paneItem is initialActiveItem
+
       anotherPaneItem = null
 
       waitsForPromise ->
@@ -184,10 +187,8 @@ describe "Autosave", ->
 
       runs ->
         spyOn(anotherPaneItem, 'save')
-        lordVoldemort = 'Lord Voldemort'
-        Controls.dontSaveIf (paneItem) -> paneItem.getText() is lordVoldemort
-        initialActiveItem.setText(lordVoldemort)
-        anotherPaneItem.setText('foo')
+        initialActiveItem.setText('foo')
+        anotherPaneItem.setText('bar')
 
         window.dispatchEvent(new FocusEvent('blur'))
 
