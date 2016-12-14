@@ -1,4 +1,5 @@
 Autosave = require '../lib/autosave'
+Controls = require '../lib/controls'
 fs = require 'fs-plus'
 
 describe "Autosave", ->
@@ -170,3 +171,25 @@ describe "Autosave", ->
     expect(-> atom.workspace.destroyActivePaneItem()).not.toThrow()
     expect(initialActiveItem.save).toHaveBeenCalled()
     expect(errorCallback.callCount).toBe 1
+
+  describe "Exposed controls", ->
+    it "doesn't save a paneItem that matches a provided predicate", ->
+      atom.config.set('autosave.enabled', true)
+      anotherPaneItem = null
+
+      waitsForPromise ->
+        atom.workspace.open('sample.coffee')
+        .then (editor) ->
+          anotherPaneItem = editor
+
+      runs ->
+        spyOn(anotherPaneItem, 'save')
+        lordVoldemort = 'Lord Voldemort'
+        Controls.dontSaveIf (paneItem) -> paneItem.getText() is lordVoldemort
+        initialActiveItem.setText(lordVoldemort)
+        anotherPaneItem.setText('foo')
+
+        window.dispatchEvent(new FocusEvent('blur'))
+
+        expect(initialActiveItem.save).not.toHaveBeenCalled()
+        expect(anotherPaneItem.save).toHaveBeenCalled()
