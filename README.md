@@ -7,20 +7,26 @@ This package is disabled by default and can be enabled via the
 `autosave.enabled` config setting or from the Autosave section of the Settings view (OS X: <kbd>cmd-,</kbd>, Windows & Linux: <kbd>Ctrl-,</kbd>).
 
 ## Service API
+The service exposes an object with a function `dontSaveIf`, which accepts a callback.
+Callbacks will be invoked with each pane item eligible for an autosave and if the callback
+returns true, the item will be skipped.
 
-### package.json
+### Usage
+
+#### package.json
 ``` json
 "consumedServices": {
   "autosave": {
     "versions": {
-      "0.22.0": "consumeAutosave"
+      "0.23.2": "consumeAutosave"
     }
   }
 }
 ```
 
-### package initialize
-``` coffeescript
-consumeAutosave: (dontSaveIf) ->
-  dontSaveIf (paneItem) -> paneItem.getPath() is '/dont/autosave/me.coffee'
+#### package initialize
+``` javascript
+consumeAutosave({dontSaveIf}) {
+  dontSaveIf(paneItem -> paneItem.getPath() === '/dont/autosave/me.coffee')
+}
 ```
