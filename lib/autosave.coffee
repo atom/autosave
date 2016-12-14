@@ -5,7 +5,7 @@ fs = require 'fs-plus'
 module.exports =
   subscriptions: null
 
-  provideControls: -> dontSaveIf
+  provideControls: -> {dontSaveIf}
 
   activate: ->
     @subscriptions = new CompositeDisposable
@@ -32,10 +32,10 @@ module.exports =
 
   autosavePaneItem: (paneItem) ->
     return unless atom.config.get('autosave.enabled')
-    return unless shouldSave(paneItem)
     return unless paneItem?.getURI?()?
     return unless paneItem?.isModified?()
     return unless paneItem?.getPath?()? and fs.isFileSync(paneItem.getPath())
+    return unless shouldSave(paneItem)
 
     pane = atom.workspace.paneForItem(paneItem)
     if pane?
