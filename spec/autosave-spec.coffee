@@ -1,4 +1,3 @@
-Autosave = require '../lib/autosave'
 fs = require 'fs-plus'
 
 describe "Autosave", ->
@@ -170,3 +169,26 @@ describe "Autosave", ->
     expect(-> atom.workspace.destroyActivePaneItem()).not.toThrow()
     expect(initialActiveItem.save).toHaveBeenCalled()
     expect(errorCallback.callCount).toBe 1
+
+  describe "dontSaveIf service", ->
+    it "doesn't save a paneItem if a predicate function registered via the dontSaveIf service returns true", ->
+      atom.config.set('autosave.enabled', true)
+      service = atom.packages.getActivePackage('autosave').mainModule.provideService()
+      service.dontSaveIf (paneItem) -> paneItem is initialActiveItem
+
+      anotherPaneItem = null
+
+      waitsForPromise ->
+        atom.workspace.open('sample.coffee')
+        .then (editor) ->
+          anotherPaneItem = editor
+
+      runs ->
+        spyOn(anotherPaneItem, 'save')
+        initialActiveItem.setText('foo')
+        anotherPaneItem.setText('bar')
+
+        window.dispatchEvent(new FocusEvent('blur'))
+
+        expect(initialActiveItem.save).not.toHaveBeenCalled()
+        expect(anotherPaneItem.save).toHaveBeenCalled()

@@ -8,6 +8,14 @@
   "engines": {
     "atom": ">0.27.0"
   },
+  "providedServices": {
+    "autosave": {
+      "description": "A configuration object to control what is autosaved",
+      "versions": {
+        "1.0.0": "provideService"
+      }
+    }
+  },
   "dependencies": {
     "fs-plus": "^2.0.0"
   },

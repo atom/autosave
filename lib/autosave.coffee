@@ -1,8 +1,11 @@
 {CompositeDisposable, Disposable} = require 'atom'
 fs = require 'fs-plus'
+{dontSaveIf, shouldSave} = require './controls'
 
 module.exports =
   subscriptions: null
+
+  provideService: -> {dontSaveIf}
 
   activate: ->
     @subscriptions = new CompositeDisposable
@@ -32,6 +35,7 @@ module.exports =
     return unless paneItem?.getURI?()?
     return unless paneItem?.isModified?()
     return unless paneItem?.getPath?()? and fs.isFileSync(paneItem.getPath())
+    return unless shouldSave(paneItem)
 
     pane = atom.workspace.paneForItem(paneItem)
     if pane?
