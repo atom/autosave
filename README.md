@@ -18,7 +18,7 @@ returns true, the item will be skipped.
 "consumedServices": {
   "autosave": {
     "versions": {
-      "0.23.2": "consumeAutosave"
+      "1.0.0": "consumeAutosave"
     }
   }
 }

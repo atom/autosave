@@ -1,5 +1,3 @@
-Autosave = require '../lib/autosave'
-Controls = require '../lib/controls'
 fs = require 'fs-plus'
 
 describe "Autosave", ->
