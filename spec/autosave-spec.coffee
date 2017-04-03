@@ -17,9 +17,14 @@ describe "Autosave", ->
       initialActiveItem = atom.workspace.getActiveTextEditor()
 
     waitsForPromise ->
-      atom.workspace.createItemForURI('sample.coffee').then (o) ->
-        otherItem1 = o
-        otherItem2 = otherItem1.copy()
+      if atom.workspace.createItemForURI?
+        atom.workspace.createItemForURI('sample.coffee').then (o) ->
+          otherItem1 = o
+          otherItem2 = otherItem1.copy()
+      else
+        atom.workspace.open('sample.coffee', {activateItem: false}).then (o) ->
+          otherItem1 = o
+          otherItem2 = otherItem1.copy()
 
     runs ->
       spyOn(initialActiveItem, 'save')
