@@ -1,7 +1,7 @@
 {
   "name": "autosave",
   "main": "./lib/autosave",
-  "version": "0.24.3",
+  "version": "0.24.4",
   "private": true,
   "description": "Save editors when they lose focus or are closed",
   "repository": "https://github.com/atom/autosave",
