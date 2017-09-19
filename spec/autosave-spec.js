@@ -1,39 +1,30 @@
 const fs = require('fs-plus')
+const {it, fit, beforeEach} = require('./async-spec-helpers')
 
 describe('Autosave', () => {
   let workspaceElement, initialActiveItem, otherItem1, otherItem2
 
-  beforeEach(() => {
+  beforeEach(async () => {
     workspaceElement = atom.views.getView(atom.workspace)
     jasmine.attachToDOM(workspaceElement)
 
-    waitsForPromise(() => atom.packages.activatePackage('autosave'))
+    await atom.packages.activatePackage('autosave')
 
-    waitsForPromise(() => atom.workspace.open('sample.js'))
+    await atom.workspace.open('sample.js')
 
-    runs(() => {
-      initialActiveItem = atom.workspace.getActiveTextEditor()
-    })
+    initialActiveItem = atom.workspace.getActiveTextEditor()
 
-    waitsForPromise(() => {
-      if (atom.workspace.createItemForURI != null) {
-        return atom.workspace.createItemForURI('sample.coffee').then(function (o) {
-          otherItem1 = o
-          otherItem2 = otherItem1.copy()
-        })
-      } else {
-        return atom.workspace.open('sample.coffee', {activateItem: false}).then(function (o) {
-          otherItem1 = o
-          otherItem2 = otherItem1.copy()
-        })
-      }
-    })
+    if (atom.workspace.createItemForURI != null) {
+      otherItem1 = await atom.workspace.createItemForURI('sample.coffee')
+    } else {
+      otherItem1 = await atom.workspace.open('sample.coffee', {activateItem: false})
+    }
 
-    runs(() => {
-      spyOn(initialActiveItem, 'save')
-      spyOn(otherItem1, 'save')
-      spyOn(otherItem2, 'save')
-    })
+    otherItem2 = otherItem1.copy()
+
+    spyOn(initialActiveItem, 'save')
+    spyOn(otherItem1, 'save')
+    spyOn(otherItem2, 'save')
   })
 
   describe('when the item is not modified', () => {
@@ -87,7 +78,7 @@ describe('Autosave', () => {
       })
     })
 
-    describe('when a new pane is created', () =>
+    describe('when a new pane is created', () => {
       it('saves the item if autosave is enabled and the item has a uri', () => {
         const leftPane = atom.workspace.getActivePane()
         const rightPane = leftPane.splitRight()
@@ -100,11 +91,11 @@ describe('Autosave', () => {
         leftPane.splitRight()
         expect(initialActiveItem.save).toHaveBeenCalled()
       })
-    )
+    })
 
     describe('when an item is destroyed', () => {
-      describe('when the item is the active item', () =>
-        it('does not save the item if autosave is enabled and the item has a uri', () => {
+      describe('when the item is the active item', () => {
+        it('does not save the item if autosave is enabled and the item has a uri', async () => {
           let leftPane = atom.workspace.getActivePane()
           const rightPane = leftPane.splitRight({items: [otherItem1]})
           leftPane.activate()
@@ -116,10 +107,10 @@ describe('Autosave', () => {
           atom.config.set('autosave.enabled', true)
           leftPane = rightPane.splitLeft({items: [otherItem2]})
           expect(otherItem2).toBe(atom.workspace.getActivePaneItem())
-          leftPane.destroyItem(otherItem2)
+          await leftPane.destroyItem(otherItem2)
           expect(otherItem2.save).toHaveBeenCalled()
         })
-      )
+      })
 
       describe('when the item is NOT the active item', () => {
         it('does not save the item if autosave is enabled and the item has a uri', () => {
@@ -140,22 +131,20 @@ describe('Autosave', () => {
       })
     })
 
-    describe('when the item does not have a URI', () =>
-      it('does not save the item', () => {
-        waitsForPromise(() => atom.workspace.open())
+    describe('when the item does not have a URI', () => {
+      it('does not save the item', async () => {
+        await atom.workspace.open()
 
-        runs(() => {
-          const pathLessItem = atom.workspace.getActiveTextEditor()
-          spyOn(pathLessItem, 'save').andCallThrough()
-          pathLessItem.setText('text!')
-          expect(pathLessItem.getURI()).toBeFalsy()
+        const pathLessItem = atom.workspace.getActiveTextEditor()
+        spyOn(pathLessItem, 'save').andCallThrough()
+        pathLessItem.setText('text!')
+        expect(pathLessItem.getURI()).toBeFalsy()
 
-          atom.config.set('autosave.enabled', true)
-          atom.workspace.getActivePane().destroyItem(pathLessItem)
-          expect(pathLessItem.save).not.toHaveBeenCalled()
-        })
+        atom.config.set('autosave.enabled', true)
+        atom.workspace.getActivePane().destroyItem(pathLessItem)
+        expect(pathLessItem.save).not.toHaveBeenCalled()
       })
-    )
+    })
   })
 
   describe('when the window is blurred', () => {
@@ -175,7 +164,7 @@ describe('Autosave', () => {
     })
   })
 
-  it("saves via the item's Pane so that write errors are handled via notifications", () => {
+  it("saves via the item's Pane so that write errors are handled via notifications", async () => {
     const saveError = new Error('Save failed')
     saveError.code = 'EACCES'
     saveError.path = initialActiveItem.getPath()
@@ -187,36 +176,27 @@ describe('Autosave', () => {
     initialActiveItem.insertText('a')
     atom.config.set('autosave.enabled', true)
 
-    expect(() => atom.workspace.destroyActivePaneItem()).not.toThrow()
+    await atom.workspace.destroyActivePaneItem()
     expect(initialActiveItem.save).toHaveBeenCalled()
     expect(errorCallback.callCount).toBe(1)
   })
 
-  describe('dontSaveIf service', () =>
-    it("doesn't save a paneItem if a predicate function registered via the dontSaveIf service returns true", () => {
+  describe('dontSaveIf service', () => {
+    it("doesn't save a paneItem if a predicate function registered via the dontSaveIf service returns true", async () => {
       atom.config.set('autosave.enabled', true)
       const service = atom.packages.getActivePackage('autosave').mainModule.provideService()
       service.dontSaveIf(paneItem => paneItem === initialActiveItem)
 
-      let anotherPaneItem = null
+      const anotherPaneItem = await atom.workspace.open('sample.coffee')
 
-      waitsForPromise(() =>
-        atom.workspace.open('sample.coffee')
-        .then(editor => {
-          anotherPaneItem = editor
-        })
-      )
+      spyOn(anotherPaneItem, 'save')
+      initialActiveItem.setText('foo')
+      anotherPaneItem.setText('bar')
 
-      runs(() => {
-        spyOn(anotherPaneItem, 'save')
-        initialActiveItem.setText('foo')
-        anotherPaneItem.setText('bar')
+      window.dispatchEvent(new FocusEvent('blur'))
 
-        window.dispatchEvent(new FocusEvent('blur'))
-
-        expect(initialActiveItem.save).not.toHaveBeenCalled()
-        expect(anotherPaneItem.save).toHaveBeenCalled()
-      })
+      expect(initialActiveItem.save).not.toHaveBeenCalled()
+      expect(anotherPaneItem.save).toHaveBeenCalled()
     })
-  )
+  })
 })
