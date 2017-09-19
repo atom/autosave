@@ -20,7 +20,24 @@
     "fs-plus": "^3.0.0"
   },
   "devDependencies": {
-    "coffeelint": "^1.9.7"
+    "standard": "^10.0.3"
+  },
+  "standard": {
+    "ignore": [
+      "spec/fixtures"
+    ],
+    "globals": [
+      "atom",
+      "describe",
+      "expect",
+      "beforeEach",
+      "jasmine",
+      "waitsForPromise",
+      "runs",
+      "spyOn",
+      "FocusEvent",
+      "it"
+    ]
   },
   "configSchema": {
     "enabled": {
