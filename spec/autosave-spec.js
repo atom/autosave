@@ -28,6 +28,14 @@ describe('Autosave', () => {
   })
 
   describe('when the item is not modified', () => {
+    it('autosaves newly added items', async () => {
+      atom.config.set('autosave.enabled', true)
+      spyOn(atom.workspace.getActivePane(), 'saveItem')
+      const newItem = await atom.workspace.open('notyet.coffee')
+
+      expect(atom.workspace.getActivePane().saveItem).toHaveBeenCalledWith(newItem)
+    })
+
     it('does not autosave the item', () => {
       atom.config.set('autosave.enabled', true)
       atom.workspace.getActivePane().splitRight({items: [otherItem1]})
