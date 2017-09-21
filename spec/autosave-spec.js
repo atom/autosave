@@ -191,20 +191,18 @@ describe('Autosave', () => {
 
   describe('dontSaveIf service', () => {
     it("doesn't save a paneItem if a predicate function registered via the dontSaveIf service returns true", async () => {
+      atom.workspace.getActivePane().addItem(otherItem1)
       atom.config.set('autosave.enabled', true)
       const service = atom.packages.getActivePackage('autosave').mainModule.provideService()
       service.dontSaveIf(paneItem => paneItem === initialActiveItem)
 
-      const anotherPaneItem = await atom.workspace.open('sample.coffee')
-
-      spyOn(anotherPaneItem, 'save')
       initialActiveItem.setText('foo')
-      anotherPaneItem.setText('bar')
+      otherItem1.setText('bar')
 
       window.dispatchEvent(new FocusEvent('blur'))
 
       expect(initialActiveItem.save).not.toHaveBeenCalled()
-      expect(anotherPaneItem.save).toHaveBeenCalled()
+      expect(otherItem1.save).toHaveBeenCalled()
     })
   })
 })
