@@ -183,6 +183,7 @@ describe('Autosave', () => {
       otherItem1.insertText('b')
 
       let deactivated = false
+      let asyncDeactivateSupported = true
       let resolveInitial = () => {}
       let resolveOther = () => {}
       initialActiveItem.save.andCallFake(() => {
@@ -196,25 +197,33 @@ describe('Autosave', () => {
         })
       })
 
-      const deactivatePromise = atom.packages.deactivatePackage('autosave')
+      let deactivatePromise = atom.packages.deactivatePackage('autosave')
       if (!deactivatePromise || !deactivatePromise.then || typeof deactivatePromise.then !== 'function') {
         // Atom does not support asynchronous package deactivation.
-        return
+        // This keeps us from failing on 1.20
+        asyncDeactivateSupported = false
+        deactivatePromise = Promise.resolve()
       }
-      deactivatePromise.then(() => {
+      deactivatePromise.then((result) => {
+        if (result === undefined) {
+          // This keeps us from failing on 1.21-beta1
+          asyncDeactivateSupported = false
+        }
         deactivated = true
       })
 
       waitsForPromise(() => Promise.resolve())
 
       runs(() => {
-        expect(deactivated).toBe(false)
+        if (asyncDeactivateSupported) {
+          expect(deactivated).toBe(false)
+        }
 
         resolveInitial()
         resolveOther()
       })
 
-      waitsFor(() => deactivated)
+      waitsFor(() => !asyncDeactivateSupported || deactivated)
     })
   })
 
