@@ -202,7 +202,12 @@ describe('Autosave', () => {
       expect(initialActiveItem.save).toHaveBeenCalled()
       expect(otherItem1.save).toHaveBeenCalled()
 
-      atom.packages.deactivatePackage('autosave').then(() => {
+      const deactivatePromise = atom.packages.deactivatePackage('autosave')
+      if (typeof deactivatePromise.then !== 'function') {
+        // Atom does not support asynchronous package deactivation.
+        return
+      }
+      deactivatePromise.then(() => {
         deactivated = true
       })
 
