@@ -230,6 +230,8 @@ describe('Autosave', () => {
     saveError.path = initialActiveItem.getPath()
     initialActiveItem.save.andCallFake(() => Promise.reject(saveError))
 
+    const errorCallback = jasmine.createSpy('errorCallback').andCallFake(({preventDefault}) => preventDefault())
+    atom.onWillThrowError(errorCallback)
     spyOn(atom.notifications, 'addWarning')
 
     initialActiveItem.insertText('a')
@@ -237,7 +239,7 @@ describe('Autosave', () => {
 
     await atom.workspace.destroyActivePaneItem()
     expect(initialActiveItem.save).toHaveBeenCalled()
-    expect(atom.notifications.addWarning).toHaveBeenCalled()
+    expect(atom.notifications.addWarning.callCount > 0 || errorCallback.callCount > 0).toBe(true)
   })
 
   describe('dontSaveIf service', () => {
