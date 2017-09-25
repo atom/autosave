@@ -172,6 +172,53 @@ describe('Autosave', () => {
     })
   })
 
+  describe('when the window is unloaded', () => {
+    it('saves all items and waits for saves to complete before deactivating', () => {
+      atom.config.set('autosave.enabled', true)
+
+      const leftPane = atom.workspace.getActivePane()
+      leftPane.splitRight({items: [otherItem1]})
+
+      initialActiveItem.insertText('a')
+      otherItem1.insertText('b')
+
+      let deactivated = false
+      let resolveInitial = () => {}
+      let resolveOther = () => {}
+      initialActiveItem.save.andCallFake(() => {
+        return new Promise(resolve => {
+          resolveInitial = resolve
+        })
+      })
+      otherItem1.save.andCallFake(() => {
+        return new Promise(resolve => {
+          resolveOther = resolve
+        })
+      })
+
+      // Triggering the beforeunload event tears down too much.
+      atom.packages.getActivePackage('autosave').mainModule.autosaveAllPaneItems()
+
+      expect(initialActiveItem.save).toHaveBeenCalled()
+      expect(otherItem1.save).toHaveBeenCalled()
+
+      atom.packages.deactivatePackage('autosave').then(() => {
+        deactivated = true
+      })
+
+      waitsForPromise(() => Promise.resolve())
+
+      runs(() => {
+        expect(deactivated).toBe(false)
+
+        resolveInitial()
+        resolveOther()
+      })
+
+      waitsFor(() => deactivated)
+    })
+  })
+
   it("saves via the item's Pane so that write errors are handled via notifications", async () => {
     const saveError = new Error('Save failed')
     saveError.code = 'EACCES'

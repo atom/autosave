@@ -33,6 +33,7 @@
       "beforeEach",
       "jasmine",
       "waitsForPromise",
+      "waitsFor",
       "runs",
       "spyOn",
       "FocusEvent",
