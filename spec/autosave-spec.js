@@ -223,17 +223,16 @@ describe('Autosave', () => {
     const saveError = new Error('Save failed')
     saveError.code = 'EACCES'
     saveError.path = initialActiveItem.getPath()
-    initialActiveItem.save.andThrow(saveError)
+    initialActiveItem.save.andCallFake(() => Promise.reject(saveError))
 
-    const errorCallback = jasmine.createSpy('errorCallback').andCallFake(({preventDefault}) => preventDefault())
-    atom.onWillThrowError(errorCallback)
+    spyOn(atom.notifications, 'addWarning')
 
     initialActiveItem.insertText('a')
     atom.config.set('autosave.enabled', true)
 
     await atom.workspace.destroyActivePaneItem()
     expect(initialActiveItem.save).toHaveBeenCalled()
-    expect(errorCallback.callCount).toBe(1)
+    expect(atom.notifications.addWarning).toHaveBeenCalled()
   })
 
   describe('dontSaveIf service', () => {
