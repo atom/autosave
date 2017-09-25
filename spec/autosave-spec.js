@@ -197,7 +197,7 @@ describe('Autosave', () => {
       })
 
       const deactivatePromise = atom.packages.deactivatePackage('autosave')
-      if (typeof deactivatePromise.then !== 'function') {
+      if (!deactivatePromise.then || typeof deactivatePromise.then !== 'function') {
         // Atom does not support asynchronous package deactivation.
         return
       }
