@@ -22,15 +22,15 @@ describe('Autosave', () => {
 
     otherItem2 = otherItem1.copy()
 
-    spyOn(initialActiveItem, 'save')
-    spyOn(otherItem1, 'save')
-    spyOn(otherItem2, 'save')
+    spyOn(initialActiveItem, 'save').andCallFake(() => Promise.resolve())
+    spyOn(otherItem1, 'save').andCallFake(() => Promise.resolve())
+    spyOn(otherItem2, 'save').andCallFake(() => Promise.resolve())
   })
 
   describe('when the item is not modified', () => {
     it('autosaves newly added items', async () => {
       atom.config.set('autosave.enabled', true)
-      spyOn(atom.workspace.getActivePane(), 'saveItem')
+      spyOn(atom.workspace.getActivePane(), 'saveItem').andCallFake(() => Promise.resolve())
       const newItem = await atom.workspace.open('notyet.coffee')
 
       expect(atom.workspace.getActivePane().saveItem).toHaveBeenCalledWith(newItem)
@@ -172,6 +172,61 @@ describe('Autosave', () => {
     })
   })
 
+  describe('when the package is deactivated', () => {
+    it('saves all items and waits for saves to complete', () => {
+      atom.config.set('autosave.enabled', true)
+
+      const leftPane = atom.workspace.getActivePane()
+      leftPane.splitRight({items: [otherItem1]})
+
+      initialActiveItem.insertText('a')
+      otherItem1.insertText('b')
+
+      let deactivated = false
+      let asyncDeactivateSupported = true
+      let resolveInitial = () => {}
+      let resolveOther = () => {}
+      initialActiveItem.save.andCallFake(() => {
+        return new Promise(resolve => {
+          resolveInitial = resolve
+        })
+      })
+      otherItem1.save.andCallFake(() => {
+        return new Promise(resolve => {
+          resolveOther = resolve
+        })
+      })
+
+      let deactivatePromise = atom.packages.deactivatePackage('autosave')
+      if (!deactivatePromise || !deactivatePromise.then || typeof deactivatePromise.then !== 'function') {
+        // Atom does not support asynchronous package deactivation.
+        // This keeps us from failing on 1.20
+        asyncDeactivateSupported = false
+        deactivatePromise = Promise.resolve()
+      }
+      deactivatePromise.then((result) => {
+        if (result === undefined) {
+          // This keeps us from failing on 1.21-beta1
+          asyncDeactivateSupported = false
+        }
+        deactivated = true
+      })
+
+      waitsForPromise(() => Promise.resolve())
+
+      runs(() => {
+        if (asyncDeactivateSupported) {
+          expect(deactivated).toBe(false)
+        }
+
+        resolveInitial()
+        resolveOther()
+      })
+
+      waitsFor(() => !asyncDeactivateSupported || deactivated)
+    })
+  })
+
   it("saves via the item's Pane so that write errors are handled via notifications", async () => {
     const saveError = new Error('Save failed')
     saveError.code = 'EACCES'
@@ -180,13 +235,14 @@ describe('Autosave', () => {
 
     const errorCallback = jasmine.createSpy('errorCallback').andCallFake(({preventDefault}) => preventDefault())
     atom.onWillThrowError(errorCallback)
+    spyOn(atom.notifications, 'addWarning')
 
     initialActiveItem.insertText('a')
     atom.config.set('autosave.enabled', true)
 
     await atom.workspace.destroyActivePaneItem()
     expect(initialActiveItem.save).toHaveBeenCalled()
-    expect(errorCallback.callCount).toBe(1)
+    expect(atom.notifications.addWarning.callCount > 0 || errorCallback.callCount > 0).toBe(true)
   })
 
   describe('dontSaveIf service', () => {
