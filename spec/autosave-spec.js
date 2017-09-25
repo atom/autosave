@@ -222,7 +222,7 @@ describe('Autosave', () => {
     const saveError = new Error('Save failed')
     saveError.code = 'EACCES'
     saveError.path = initialActiveItem.getPath()
-    initialActiveItem.save.andCallFake(() => Promise.reject(saveError))
+    initialActiveItem.save.andThrow(saveError)
 
     const errorCallback = jasmine.createSpy('errorCallback').andCallFake(({preventDefault}) => preventDefault())
     atom.onWillThrowError(errorCallback)
