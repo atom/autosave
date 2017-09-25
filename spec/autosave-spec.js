@@ -172,8 +172,8 @@ describe('Autosave', () => {
     })
   })
 
-  describe('when the window is unloaded', () => {
-    it('saves all items and waits for saves to complete before deactivating', () => {
+  describe('when the package is deactivated', () => {
+    it('saves all items and waits for saves to complete', () => {
       atom.config.set('autosave.enabled', true)
 
       const leftPane = atom.workspace.getActivePane()
@@ -195,12 +195,6 @@ describe('Autosave', () => {
           resolveOther = resolve
         })
       })
-
-      // Triggering the beforeunload event tears down too much.
-      atom.packages.getActivePackage('autosave').mainModule.autosaveAllPaneItems()
-
-      expect(initialActiveItem.save).toHaveBeenCalled()
-      expect(otherItem1.save).toHaveBeenCalled()
 
       const deactivatePromise = atom.packages.deactivatePackage('autosave')
       if (typeof deactivatePromise.then !== 'function') {
