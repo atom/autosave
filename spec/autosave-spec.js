@@ -22,15 +22,15 @@ describe('Autosave', () => {
 
     otherItem2 = otherItem1.copy()
 
-    spyOn(initialActiveItem, 'save')
-    spyOn(otherItem1, 'save')
-    spyOn(otherItem2, 'save')
+    spyOn(initialActiveItem, 'save').andCallFake(() => Promise.resolve())
+    spyOn(otherItem1, 'save').andCallFake(() => Promise.resolve())
+    spyOn(otherItem2, 'save').andCallFake(() => Promise.resolve())
   })
 
   describe('when the item is not modified', () => {
     it('autosaves newly added items', async () => {
       atom.config.set('autosave.enabled', true)
-      spyOn(atom.workspace.getActivePane(), 'saveItem')
+      spyOn(atom.workspace.getActivePane(), 'saveItem').andCallFake(() => Promise.resolve())
       const newItem = await atom.workspace.open('notyet.coffee')
 
       expect(atom.workspace.getActivePane().saveItem).toHaveBeenCalledWith(newItem)
