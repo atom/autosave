@@ -28,14 +28,6 @@ describe('Autosave', () => {
   })
 
   describe('when the item is not modified', () => {
-    it('autosaves newly added items', async () => {
-      atom.config.set('autosave.enabled', true)
-      spyOn(atom.workspace.getActivePane(), 'saveItem').andCallFake(() => Promise.resolve())
-      const newItem = await atom.workspace.open('notyet.coffee')
-
-      expect(atom.workspace.getActivePane().saveItem).toHaveBeenCalledWith(newItem)
-    })
-
     it('does not autosave the item', () => {
       atom.config.set('autosave.enabled', true)
       atom.workspace.getActivePane().splitRight({items: [otherItem1]})
@@ -45,6 +37,17 @@ describe('Autosave', () => {
 
   describe('when the buffer is modified', () => {
     beforeEach(() => initialActiveItem.setText('i am modified'))
+
+    it('autosaves newly added items', async () => {
+      const newItem = await atom.workspace.createItemForURI('notyet.js')
+      spyOn(newItem, 'isModified').andReturn(true)
+
+      atom.config.set('autosave.enabled', true)
+      spyOn(atom.workspace.getActivePane(), 'saveItem').andCallFake(() => Promise.resolve())
+      atom.workspace.getActivePane().addItem(newItem)
+
+      expect(atom.workspace.getActivePane().saveItem).toHaveBeenCalledWith(newItem)
+    })
 
     describe('when a pane loses focus', () => {
       it('saves the item if autosave is enabled and the item has a uri', () => {
