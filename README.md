@@ -3,8 +3,9 @@
 
 Autosaves editor when they lose focus, are destroyed, or when the window is closed.
 
-This package is disabled by default and can be enabled via the
-`autosave.enabled` config setting or from the Autosave section of the Settings view (OS X: <kbd>cmd-,</kbd>, Windows & Linux: <kbd>Ctrl-,</kbd>).
+This package is disabled by default and can be enabled via the `autosave.enabled` config
+setting or by checking *Enabled* in the settings for the *autosave* package in the
+Settings view.
 
 ## Service API
 The service exposes an object with a function `dontSaveIf`, which accepts a callback.
